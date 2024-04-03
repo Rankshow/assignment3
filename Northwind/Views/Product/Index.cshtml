@@ -1,0 +1,95 @@
+﻿@model IEnumerable<Northwind.Dtos.CategoryDto>
+
+@{
+    ViewData["Title"] = "Index";
+    int id = ViewBag.categoryId;
+    var categories = Model;
+    var products = categories.Where(x => x.CategoryId == id).FirstOrDefault().Products;
+}
+
+<div>
+<p>Category : 
+    <select id="categoryDropdown" name="Categories
+    <option value="">Please Choose User category:</option>
+        @foreach (var category in Model)
+        {
+              <option value="@category.CategoryId">@category.CategoryName</option>
+           
+        }
+    </select>
+</p>
+</div>
+
+<h1>
+    Products
+</h1>
+<table id="productsTable" class="table">
+    <thead>
+        <tr>
+            <th>
+    @Html.DisplayNameFor(model => model.Products.FirstOrDefault().ProductName)
+            </th>
+            <th>
+    @Html.DisplayNameFor(model => model.Products.FirstOrDefault().UnitPrice)
+            </th>
+            <th>
+    @Html.DisplayNameFor(model => model.Products.FirstOrDefault().UnitsInStock)
+            </th>
+            <th>
+    @Html.DisplayNameFor(model => model.Products.FirstOrDefault().UnitsOnOrder)
+            </th>
+            <th>
+        </tr>
+    </thead>
+    <tbody>
+    @foreach (var item in products)
+    {
+            <tr>
+                <td>
+                    <a href="@Url.Action("Detail", "Product", new { id = item.ProductId })">@Html.DisplayFor(modelItem => item.ProductName)</a>
+                </td>
+                <td>
+                @Html.DisplayFor(modelItem => item.UnitPrice)
+                </td>
+                <td>
+                @Html.DisplayFor(modelItem => item.UnitsInStock)
+                </td>
+                <td>
+                @Html.DisplayFor(modelItem => item.UnitsOnOrder)
+                </td>
+            </tr>
+    }
+    </tbody>
+</table>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    $(document).ready(function () {
+        $('#categoryDropdown').change(function () {
+            var categoryId = $(this).val();
+            updateProducts(categoryId);
+        });
+
+        function updateProducts(categoryId) {
+            $.ajax({
+                url: `/Product/GetProductsByCategoryId?categoryId=${categoryId}`,
+                type: 'GET',
+                success: function (data) {
+                    $('#productsTable tbody').empty();
+                    $.each(data, function (index, product) {
+                        var row = '<tr>' +
+                            '<td>' + product.productName + '</td>' +
+                            '<td>' + product.unitPrice + '</td>' +
+                            '<td>' + product.unitsInStock + '</td>' +
+                            '<td>' + product.unitsOnOrder + '</td>' +
+                            '</tr>';                        
+                        $('#productsTable tbody').append(row);
+                    });
+                },
+                error: function (xhr, status, error) {
+                    console.error('Error fetching products:', error);
+                }
+            });
+        }
+    });
+</script>
+
